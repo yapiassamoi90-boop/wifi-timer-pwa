@@ -3,77 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Accès Wi-Fi Temporaire</title>
+  <title>Gestion Wi-Fi</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
     body { background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
     .card { background: #ffffff; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; width: 100%; text-align: center; }
-    h2 { color: #1a1a1a; margin-bottom: 8px; }
+    .timer-display { font-size: 1.5rem; font-weight: bold; color: #2c3e50; margin-bottom: 20px; background: #eef2f7; padding: 10px; border-radius: 8px; }
     .qr-container { background: #fafafa; border: 2px dashed #ddd; border-radius: 12px; padding: 15px; margin-bottom: 20px; min-height: 250px; display: flex; justify-content: center; align-items: center; }
     .qr-container img { max-width: 100%; height: auto; border-radius: 8px; }
-    .expired-box { display: none; color: #e74c3c; font-weight: bold; }
-    .timer-display { font-size: 1.5rem; font-weight: bold; color: #2c3e50; margin-bottom: 20px; background: #eef2f7; padding: 10px; border-radius: 8px; }
-    .btn { background-color: #007bff; color: white; border: none; padding: 12px 20px; font-size: 1rem; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; }
+    .btn { background-color: #007bff; color: white; border: none; padding: 12px 20px; font-size: 1rem; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
+    .btn-secondary { background-color: #6c757d; }
+    input[type="file"] { display: none; }
   </style>
 </head>
 <body>
 
 <div class="card">
   <h2>AU SERVICE DE TOUS</h2>
-  <p>Accès réseau (30 min)</p>
   <div class="timer-display" id="timer">30:00</div>
 
   <div class="qr-container">
-    <!-- Fichier mis à jour ici -->
     <img id="qrImage" src="Screenshot_20260820_113444_Settings.jpg" alt="QR Code">
-    <div id="expiredMsg" class="expired-box">⚠️ Accès expiré !</div>
   </div>
 
-  <button class="btn" onclick="startNewSession()">Générer / Recharger</button>
+  <!-- Nouveau bouton pour choisir une autre image -->
+  <label class="btn btn-secondary" for="fileInput">Changer le QR Code</label>
+  <input type="file" id="fileInput" accept="image/*">
+  
+  <button class="btn" onclick="startNewSession()">Relancer 30 min</button>
 </div>
 
 <script>
   const DURATION_MINUTES = 30;
-  let countdown;
+
+  // Gestion du chargement d'image en direct
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        document.getElementById('qrImage').src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
   function startTimer(durationInSeconds) {
-    clearInterval(countdown);
     let timer = durationInSeconds;
     const timerDisplay = document.getElementById('timer');
     const qrImage = document.getElementById('qrImage');
-    const expiredMsg = document.getElementById('expiredMsg');
 
     qrImage.style.display = "block";
-    expiredMsg.style.display = "none";
 
-    countdown = setInterval(() => {
+    const interval = setInterval(() => {
       const m = parseInt(timer / 60, 10);
       const s = parseInt(timer % 60, 10);
       timerDisplay.textContent = `${m < 10 ? "0"+m : m}:${s < 10 ? "0"+s : s}`;
       if (--timer < 0) {
-        clearInterval(countdown);
-        timerDisplay.textContent = "00:00";
+        clearInterval(interval);
         qrImage.style.display = "none";
-        expiredMsg.style.display = "block";
-        localStorage.removeItem('wifi_expiration');
+        alert("Temps écoulé !");
       }
     }, 1000);
   }
 
   function startNewSession() {
-    const expires = Date.now() + (DURATION_MINUTES * 60 * 1000);
-    localStorage.setItem('wifi_expiration', expires);
     startTimer(DURATION_MINUTES * 60);
   }
-
-  window.onload = () => {
-    const saved = localStorage.getItem('wifi_expiration');
-    if (saved && saved > Date.now()) {
-      startTimer(Math.floor((saved - Date.now()) / 1000));
-    } else {
-      startNewSession();
-    }
-  };
 </script>
 </body>
 </html>
