@@ -83,9 +83,6 @@
     .btn:hover {
       background-color: #0056b3;
     }
-    .file-input {
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -97,7 +94,8 @@
   <div class="timer-display" id="timer">30:00</div>
 
   <div class="qr-container">
-    <img id="qrImage" src="2186.jpg" alt="QR Code Wi-Fi">
+    <!-- Nom de fichier mis à jour ici -->
+    <img id="qrImage" src="Screenshot_20260820_113444_113454.jpg" alt="QR Code Wi-Fi">
     <div id="expiredMsg" class="expired-box">
       <p>⚠️ Accès expiré !</p>
       <p style="font-size: 0.85rem; font-weight: normal; margin-top: 5px; color: #555;">
@@ -106,7 +104,6 @@
     </div>
   </div>
 
-  <input type="file" id="uploadInput" class="file-input" accept="image/*">
   <button class="btn" onclick="startNewSession()">Générer / Recharger (30 min)</button>
 </div>
 
@@ -150,7 +147,6 @@
     startTimer(DURATION_MINUTES * 60);
   }
 
-  // Vérification de la session active au chargement
   window.onload = function () {
     const savedExpiration = localStorage.getItem('wifi_expiration');
     
@@ -162,10 +158,9 @@
         document.getElementById('timer').textContent = "00:00";
         document.getElementById('qrImage').style.display = "none";
         document.getElementById('expiredMsg').style.display = "block";
-        localStorage.removeItem('wifi_expiration');
       }
     } else {
-      startNewSession();
+      startTimer(DURATION_MINUTES * 60); // Affiche le temps au chargement initial
     }
   };
 </script>
